@@ -1,0 +1,7 @@
+id,name,displayName,created,description,modified,entitlements,groups,permissions
+Admin,Admin,Admin,,Admin,,,,
+HelpDesk,HelpDesk,HelpDesk,,HelpDesk,,,,
+Manager,Manager,Manager,,Manager,,,,
+Senior Manager,Senior Manager,Senior Manager,,Senior Manager,,,,
+VP,VP,VP,,VP,,,,
+Director,Director,Director,,Director,,,,

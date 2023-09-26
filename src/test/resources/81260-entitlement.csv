@@ -1,0 +1,2 @@
+id,name,displayName,created,description,modified,entitlements,groups,permissions,testOwner
+123,testEntitlement,Test Entitlement,8/12/2022,Entitlement for Testing,8/12/2022,,,,luiz.carlos

@@ -1,0 +1,6 @@
+id,givenName,familyName,e-mail,manager,group,role
+300010,Lewis,Hamilton,lhamilton@mercedes.com,300011,Admin,Analyst
+300011,Nico,Rosberg,nrosberg@mercedes.com,300022,HelpDesk,Engineer
+300022,Frank,Williams,frank@williamsf1.com,300198,Manager,Engineer
+300145,Paddy,Lowe,plowe@mercedes.com,300198,Senior Manager,Architect
+300198,Doe,John,jdoe@mercedes.com,,Admin,Analyst
