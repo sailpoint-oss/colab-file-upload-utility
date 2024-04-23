@@ -1,0 +1,52 @@
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'application'
+    id 'java'
+}
+
+group 'sailpoint.cloud'
+version '4.0.0-rc2'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    junitVersion = '5.8.2'
+}
+
+sourceCompatibility = '1.17'
+targetCompatibility = '1.17'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'sailpoint.utils.FileUploadUtility'
+    }
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.9.1'
+    implementation 'org.jcommander:jcommander:1.83'
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    implementation 'org.apache.commons:commons-collections4:4.5.0-M1'
+    implementation 'commons-io:commons-io:2.16.1'
+    implementation 'info.picocli:picocli:4.7.5'
+    implementation 'com.squareup.retrofit2:retrofit:2.11.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    testImplementation 'junit:junit:4.13.1'
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+application {
+    mainClass = 'sailpoint.utils.FileUploadUtility'
+}

@@ -1,9 +1,13 @@
-package sailpoint.identitynow.utils;
+package sailpoint.utils;
 
 public class Logger {
 
 	boolean verbose = false;
-	
+
+	public Logger() {
+		this( false );
+	}
+
 	public Logger(boolean verbose) {
 		super();
 		this.verbose = verbose;
