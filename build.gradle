@@ -16,8 +16,11 @@ ext {
     junitVersion = '5.8.2'
 }
 
-sourceCompatibility = '1.17'
-targetCompatibility = '1.17'
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
+
+compileJava.options.fork = true
+compileJava.options.forkOptions.executable = '/opt/homebrew/Cellar/openjdk@11/11.0.23/bin/javac'
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'

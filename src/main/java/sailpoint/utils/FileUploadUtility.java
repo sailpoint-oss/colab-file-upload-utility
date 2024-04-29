@@ -38,8 +38,8 @@ public class FileUploadUtility implements Callable<Integer> {
 	/**
 	 * Metadata about the File Upload Utility
 	 */
-	public static final String ABOUT_DATE = "2024-04-16 16:14 CST";
-	public static final String ABOUT_VERSION = "4.0.0";
+	public static final String ABOUT_DATE = "2024-04-29 11:07 CST";
+	public static final String ABOUT_VERSION = "4.0.0 RC 2";
 	public static final String ABOUT_LINK = "https://developer.sailpoint.com/discuss/t/file-upload-utility/18181";
 
 	/**
@@ -61,7 +61,7 @@ public class FileUploadUtility implements Callable<Integer> {
 	private boolean disableOptimization = false;
 
 	@Option( names = { "-o", "--objectType" }, description = "File Type; Account or Entitlement Schema. Default: Account" )
-	private String objectType = ACCOUNT_AGGREGATION;
+	private String objectType = DEFAULT_ACCOUNT_AGGREGATION;
 
 	@Option( names = { "-R", "--recursive" }, description = "Recursively search directories" )
 	private boolean recursive = false;
@@ -112,8 +112,7 @@ public class FileUploadUtility implements Callable<Integer> {
 	 */
 	private Map<String, String> sourceReferenceMap = null;
 
-	public static final String ACCOUNT_AGGREGATION = "Account";
-	public static final String ENTITLEMENT_AGGREGATION = "Entitlement";
+	public static final String DEFAULT_ACCOUNT_AGGREGATION = "account";
 
 	public FileUploadUtility() {
 		super();
@@ -146,12 +145,7 @@ public class FileUploadUtility implements Callable<Integer> {
 
 		} catch ( UnsupportedClassVersionError ue ) {
 
-			System.out.println("""
-					Unsupported version of Java:
-					JVM: ${java.version} (${java.vendor} ${java.vm.name} ${java.vm.version})
-					OS: ${os.name} ${os.version} ${os.arch}
-
-					Please upgrade to JDK 17 or higher.""");
+			System.out.println( "Unsupported version of Java: Please upgrade to JDK 11 or higher." );
 
 		} catch ( Exception e ) {
 
@@ -184,7 +178,7 @@ public class FileUploadUtility implements Callable<Integer> {
 		logger.info( String.format("%1$-20s %2$-30s ", " Files:", StringUtils.join( files, ", \n" ) ) );
 		logger.info( String.format("%1$-20s %2$-30s ", " ObjectType:", objectType ) );
 
-		if ( ACCOUNT_AGGREGATION.equals( objectType ) )
+		if ( DEFAULT_ACCOUNT_AGGREGATION.equals( objectType ) )
 			logger.info( String.format("%1$-20s %2$-30s ", " Optimization:", !disableOptimization ) );
 
 		logger.info( String.format("%1$-20s %2$-30s ", " Recursive:", recursive ) );
@@ -235,12 +229,12 @@ public class FileUploadUtility implements Callable<Integer> {
 					Iterator<File> fileIterator = FileUtils.iterateFiles( file, fileExtensions.toArray(String[]::new), recursive );
 
 					while ( fileIterator.hasNext() ) {
-						processFile( fileIterator.next(), objectType );
+						processFile( fileIterator.next() );
 					}
 
 				} else {
 					logger.info("Analyzing " + objectType + " file: " + file);
-					processFile( file, objectType );
+					processFile( file );
 				}
 			}
 		}
@@ -303,9 +297,9 @@ public class FileUploadUtility implements Callable<Integer> {
 	 * Helper Methods
 	 */
 
-	private void processFile( File file, String fileType ) {
+	private void processFile( File file ) {
 
-		logger.info( "Analyzing " + fileType + " file: " + file.getName() );
+		logger.info( "Analyzing " + objectType + " file: " + file.getName() );
 
 		final String sourceId = getSourceReferenceFromFile( file );
 
@@ -320,15 +314,21 @@ public class FileUploadUtility implements Callable<Integer> {
 
 			try {
 
-				if ( ACCOUNT_AGGREGATION.equals( fileType ) ) {
+				/*
+				 * If the objectType is 'account' then we'll aggregate it as an account.  This is the default behavior.
+				 */
+				if ( DEFAULT_ACCOUNT_AGGREGATION.equalsIgnoreCase( objectType ) ) {
 
 					logger.debug( "\tFile [" + file.getName() + "]: Submitting Account Aggregation: Source ID[" + sourceId + "], Disable Optimization[" + disableOptimization + "]" );
 					response = sailPointService.aggregateAccounts(sourceId, disableOptimization, file);
 
-				} else if ( ENTITLEMENT_AGGREGATION.equals( fileType ) ) {
+				/*
+				 * If the objectType is something else then we'll aggregate it as an entitlement.  Entitlement aggregations can be many different objectTypes.
+				 */
+				} else {
 
-					logger.debug( "\tFile [" + file.getName() + "]: Submitting Entitlement Aggregation: Source ID[" + sourceId + "]" );
-					response = sailPointService.aggregateEntitlements(sourceId, fileType, file);
+					logger.debug( "\tFile [" + file.getName() + "]: Submitting Entitlement Aggregation: Source ID[" + sourceId + "], Object Type[" + objectType + "]" );
+					response = sailPointService.aggregateEntitlements(sourceId, objectType, file);
 
 				}
 
