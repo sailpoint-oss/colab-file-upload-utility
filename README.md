@@ -18,248 +18,357 @@
 [New to the CoLab? Click here »](https://developer.sailpoint.com/discuss/t/about-the-sailpoint-developer-community-colab/11230)
 
 # Overview
-The SailPoint File Upload Utility provides a way for SailPoint customers to upload files to Identity Security Cloud automatically, for automatic account and entitlement aggregations. This is an executable Java-based JAR which can be executed with a set of options, or scheduled via CLI utilities like cron. This utility uploads the files the same way as if you were to upload the files via the admin user interface, by calling SailPoint REST APIs.
+The SailPoint File Upload Utility provides a way for SailPoint customers to upload files to Identity Security Cloud automatically, for automatic account and entitlement aggregations. This is an executable Java-based JAR which can be executed with a set of options, or scheduled via CLI utilities like `cron`. This utility uploads files the same way as if you were to upload the files via the admin user interface, by calling the supported SailPoint REST APIs.
 
-# Requirements
-This utility is a Java based application and requires Java Development Kit (JDK) 17 or higher to run.  We build and test against OpenJDK 17.
+# Getting Started
 
-This also requires external, outbound access over HTTPS (443) for REST HTTP API calls to the SailPoint Cloud.
+Using File Upload Utility is pretty straight-forward, and follows the pattern of normal Java JAR execution:
+```
+java -jar sailpoint-file-upload-utility.jar <commands>
+```
 
-# Guide
+## Options 
+
+We cover using specific use cases further below, but here are all available options to pass to the File Upload Utility.
+
+| Option                               | Required | Example Usage                                  | Description                                                                                 |
+|--------------------------------------|----------|------------------------------------------------|---------------------------------------------------------------------------------------------|
+| `-u <arg>`, `--url <arg>`            | Required | `--url https://example.api.identitynow.com`    | SailPoint API Gateway (e.g. https://tenant.api.identitynow.com)                             |
+| `-i <arg>`, `--clientId <arg>`       | Required | `--clientId d0b...574`                         | SailPoint Client ID (PAT)                                                                   |
+| `-s <arg>`, `--clientSecret <arg>`   | Required | `--clientSecret a34...1df`                     | SailPoint Client Secret (PAT).  If not supplied, will be prompted.                          |
+| `-f <arg>`, `--file <arg>`           | Required | `--file /Users/neil.mcglennon/test/resources/` | File or directories for bulk aggregation. This can be specified multiple times.             |
+| `-d`, `--disableOptimization`        | Optional | `--disableOptimization`                        | Disable Optimization on Account Aggregation                                                 |
+| `-o <arg>`, `--objectType <arg>`     | Optional | `--objectType group`                           | File Type; Account or Entitlement Schema. Default: Account                                  |
+| `-R`, `--recursive`                  | Optional | `--recursive`                                  | Recursively search directories                                                              |
+| `-S`, `--simulate`                   | Optional | `--simulate`                                   | Simulation Mode.  Scans for files but does not aggregate.                                   |
+| `-t <arg>`, `--timeout <arg>`        | Optional | `--timeout 100000`                             | Timeout (in milliseconds). Default: 10000 (10s)                                             |
+| `-x <arg>`, `--extension <arg>`      | Optional | `--extension csv`                              | File extensions to search (for directories only).  Default: csv                             |
+| `-v`, `--verbose`                    | Optional | `--verbose`                                    | Verbose logging. Default: false                                                             |
+| `-H <arg>`, `--proxyHost <arg>`      | Optional | `--proxyHost proxy.host.com`                   | Proxy host name or IP. Use `--proxyHost` and `--proxyPort` together.                        |
+| `-P <arg>`, `--proxyPort <arg>`      | Optional | `--proxyPort 443`                              | Proxy port. Use `--proxyHost` and `--proxyPort` together.                                   |
+| `-U <arg>`, `--proxyUser <arg>`      | Optional | `--proxyUser foo`                              | Proxy user for authenticated proxies. Use `--proxyUser` and `--proxyPassword` together.     |
+| `-W <arg>`, `--proxyPassword <arg>`  | Optional | `--proxyPassword bar`                          | Proxy password for authenticated proxies. Use `--proxyUser` and `--proxyPassword` together. |
+| `-V`, `--version`                    | Optional | `--version`                                    | Displays the current version.                                                               |
+| `-h`, `--help`                       | Optional | `--help`                                       | Displays help.                                                                              |
+
+## Requirements
+
+- **Java** -  is a Java based application and requires Java Development Kit (JDK) 11 or higher to run.  We build and test against OpenJDK 11 as well as OpenJDK 17.
+- **Network** - This also requires external, outbound access over HTTPS (443) via REST API calls to the SailPoint Cloud as indicated by the URL you configure the File Upload Utility.
+
+## Help and Usage
+
+In order to see help and usage of the File Upload Utility, supply the `--help` or `-h` options.  The output of this looks like this:
+
+```shell
+$ java -jar sailpoint-file-upload-utility.jar --help
+Usage:
+
+Perform bulk file aggregations to Identity Security Cloud.
+
+java -jar sailpoint-file-upload-utility.jar [-dhRSvV] -s[=<clientSecret>] [-H=<proxyHost>] -i=<clientId> [-o=<objectType>] [-P=<proxyPort>] [-t=<timeout>] -u=<url> [-U=<proxyUser>] [-W=<proxyPassword>] -f=<files> [-f=<files>]... [-x=<fileExtensions>]...
+
+Description:
+
+Scans specified files and directories for files in bulk, to send to Identity Security Cloud for account or entitlement aggregation.  For more details see: https://developer.sailpoint.com/discuss/t/file-upload-utility/18181
+
+Options:
+  -u, --url=<url>           SailPoint API Gateway (e.g. https://tenant.api.identitynow.com)
+  -i, --clientId=<clientId> SailPoint Client ID (PAT)
+  -s, --clientSecret[=<clientSecret>]
+                            SailPoint Client Secret (PAT)
+  -f, --file=<files>        File or directories for bulk aggregation.
+  -d, --disableOptimization Disable Optimization on Account Aggregation
+  -o, --objectType=<objectType>
+                            File Type; Account or Entitlement Schema. Default: Account
+  -R, --recursive           Recursively search directories
+  -S, --simulate            Simulation Mode.  Scans for files but does not aggregate.
+  -t, --timeout=<timeout>   Timeout (in milliseconds). Default: 10000 (10s)
+  -x, --extension=<fileExtensions>
+                            File extensions to search (for directories only).  Default: csv
+  -v, --verbose             Verbose logging. Default: false
+  -H, --proxyHost=<proxyHost>
+                            Proxy Host
+  -P, --proxyPort=<proxyPort>
+                            Proxy Post
+  -U, --proxyUser=<proxyUser>
+                            Proxy User; Used for authenticated proxies
+  -W, --proxyPassword=<proxyPassword>
+                            Proxy Password; Used for authenticated proxies
+  -V, --version             Displays the current version.
+  -h, --help                Display help.
+```
+This command is useful for quick reference in places where documentation is not readily available.
+
+## Version
+
+To see the current version of File Upload Utility, supply the `--version` or `-V` option.  Output should look like this:
+```
+$ java -jar sailpoint-file-upload-utility.jar --version
+SailPoint File Upload Utility 4.0.0
+Build: 2024-05-01 9:00 CST
+Documentation: https://developer.sailpoint.com/discuss/t/file-upload-utility/18181
+JVM: 17.0.10 (Amazon.com Inc. OpenJDK 64-Bit Server VM 17.0.10+7-LTS)
+OS: Mac OS X 14.4.1 aarch64
+```
+This command is useful for quick reference which version of the File Upload Utility you are running, as well as which version of Java is being run, often for troubleshooting processes.
+
+## Aggregating Account Files
+
+To aggregate account files, you'll want to specify the following options:
+
+```shell
+$ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identitynow.com --clientId d0b28ce1b2694b64949dd546de1ff574 --clientSecret a34...1df --file /Users/neil.mcglennon/test/resources/ -R
+------------------------------------------------------------------------------------------------------------
+ SailPoint File Upload Utility
+------------------------------------------------------------------------------------------------------------
+ Version:            4.0.0                          
+ Date:               2024-05-01 9:00 CST            
+ Docs:               https://developer.sailpoint.com/discuss/t/file-upload-utility/18181 
+------------------------------------------------------------------------------------------------------------
+ URL:                https://example.api.identitynow.com 
+ Client ID:          d0b28ce1b2694b64949dd546de1ff574 
+ Files:              /Users/neil.mcglennon/test/resources 
+ ObjectType:         account                        
+ Optimization:       true                           
+ Recursive:          true                           
+ Extensions:         csv                            
+ Simulation:         false                          
+ Verbose:            false                          
+ Timeout:            10000                          
+------------------------------------------------------------------------------------------------------------
+Checking credentials...
+Analyzing directory: /Users/neil.mcglennon/test/resources
+Analyzing account file: 184744-AuthEmployees.csv
+        File [184744-AuthEmployees.csv]: Aggregated successfully.
+Analyzing account file: 2c918087701c40cf01701dfdf2c61e2a-AuthEmployees.csv
+        File [2c918087701c40cf01701dfdf2c61e2a-AuthEmployees.csv]: Aggregated successfully.
+Analyzing account file: 184744 - AuthEmployees.csv
+        File [184744 - AuthEmployees.csv]: Aggregated successfully.
+Analyzing account file: Don't Read.csv
+        File [Don't Read.csv]: Does not contain a valid source ID. Skipping...
+Analyzing account file: f1f3b747be924745afbc0c8a53f71baf-file-test-account-feed.csv
+        File [f1f3b747be924745afbc0c8a53f71baf-file-test-account-feed.csv]: Aggregated successfully.
+Analyzing account file: 82343-accounts.csv
+        File [82343-accounts.csv]: Unable to resolve old source ID reference [82343] to new source ID reference. This file will be skipped.
+        File [82343-accounts.csv]: Does not contain a valid source ID. Skipping...
+Analyzing account file: f1f3b747be924745afbc0c8a53f71baf-file-test-entitlement-feed.csv
+        File [f1f3b747be924745afbc0c8a53f71baf-file-test-entitlement-feed.csv]: Error: HTTP Code[400] Message[] Body[{"detailCode":"400.1.3 Illegal value","trackingId":"cbb5c4d0224b47f29a7cc261e7dc97fd","messages":[{"locale":"und","localeOrigin":"REQUEST","text":"Column: \"[displayName, created, description, modified, entitlements, permissions]\" is unknown and/or column: \"[givenName, familyName, e-mail, location, manager]\" is missing"},{"locale":"en-US","localeOrigin":"DEFAULT","text":"Column: \"[displayName, created, description, modified, entitlements, permissions]\" is unknown and/or column: \"[givenName, familyName, e-mail, location, manager]\" is missing"}],"causes":[]}]
+Complete.
+------------------------------------------------------------------------------------------------------------
+ Elapsed time:       4 seconds                      
+ Files processed:    7                             
+------------------------------------------------------------------------------------------------------------
+ Success:            4                              
+------------------------------------------------------------------------------------------------------------
+ Error:              1                              
+------------------------------------------------------------------------------------------------------------
+ Skipped:            2                              
+------------------------------------------------------------------------------------------------------------
+```
+
+
+## Aggregating Entitlement Files
+
+To aggregate entitlement files, you'll want to specify the following options:
+
+Execution of this might look like the following:
+
+```shell
+$ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identitynow.com --clientId d0b28ce1b2694b64949dd546de1ff574 --clientSecret a34...1df --file /Users/neil.mcglennon/test/resources/entitlements/f1f3b747be924745afbc0c8a53f71baf-file-test-entitlement-feed.csv --objectType group
+------------------------------------------------------------------------------------------------------------
+ SailPoint File Upload Utility
+------------------------------------------------------------------------------------------------------------
+ Version:            4.0.0                          
+ Date:               2024-05-01 9:00 CST            
+ Docs:               https://developer.sailpoint.com/discuss/t/file-upload-utility/18181 
+------------------------------------------------------------------------------------------------------------
+ URL:                https://example.api.identitynow.com 
+ Client ID:          d0b28ce1b2694b64949dd546de1ff574 
+ Files:              /Users/neil.mcglennon/Workspace/sailpoint-file-upload-utility/src/test/resources/entitlements/f1f3b747be924745afbc0c8a53f71baf-file-test-entitlement-feed.csv 
+ ObjectType:         group                          
+ Recursive:          true                           
+ Extensions:         csv                            
+ Simulation:         false                          
+ Verbose:            false                          
+ Timeout:            10000                          
+------------------------------------------------------------------------------------------------------------
+Checking credentials...
+Analyzing group file: /Users/neil.mcglennon/test/resources/entitlements/f1f3b747be924745afbc0c8a53f71baf-file-test-entitlement-feed.csv
+Analyzing group file: f1f3b747be924745afbc0c8a53f71baf-file-test-entitlement-feed.csv
+        File [f1f3b747be924745afbc0c8a53f71baf-file-test-entitlement-feed.csv]: Aggregated successfully.
+Complete.
+------------------------------------------------------------------------------------------------------------
+ Elapsed time:       1 seconds                      
+ Files processed:    1                              
+------------------------------------------------------------------------------------------------------------
+ Success:            1                              
+------------------------------------------------------------------------------------------------------------
+ Error:              0                              
+------------------------------------------------------------------------------------------------------------
+ Skipped:            0                              
+------------------------------------------------------------------------------------------------------------
+```
+
+# Additional Details
+
+This section outlines additional details related to troubleshooting, frequently asked questions, and other technical details.
+
+### File Naming Convention
+
+The File Upload Utility analyzes at the files or directories you specify, and then looks for the application’s source ID in the beginning of the file name of the file. For example, for a file named `2c918087701c40cf01701dfdf2c61e2a-AuthEmployees.csv` a source ID `2c918087701c40cf01701dfdf2c61e2a` would be returned.  A source ID is required for either account or entitlement aggregation to succeed as that is what the REST APIs require. To find the source ID, you can see this in the browser's URL in your browser, or via source REST APIs.
+
+If File Upload Utility doesn't find the source ID in the file name, then it will skip the file and move on to the next. Everything will be logged as output, so you are able to determine which file(s) were processed or not.  To test and see if your source ID can be found, run the simple regeular expression on the file name:
+
+```regexp
+^(\s)?([0-9a-f]{32})
+```
+
+### File Naming Backward Compatibility with Older Source IDs
+
+For those who are upgrading from previous versions of File Upload Utility, you'll know that older source IDs (e.g. `184744`) are much shorter than newer source IDs (e.g. `2c918087701c40cf01701dfdf2c61e2a`).  In an attempt to keep backwards compatibility, if File Upload Utility detects an older short source ID (e.g. `184744`), it will attempt to look up which new source ID this might map to.  In order to do this, File Upload Utility will iterate through all sources in the system and download a list.  This is visible when running File Upload Utility with the `--verbose` option:
+
+```shell
+...
+Analyzing directory: /Users/neil.mcglennon/test/resources
+Analyzing account file: 184744-AuthEmployees.csv
+        File [184744-AuthEmployees.csv]: Detected with older source ID reference [184744]. Attempting to resolve.
+------------------------------------------------------------------------------------------------------------
+ Building source file lookup table. Starting source iteration. 
+ To avoid this scan, please switch to new Source IDs in your file names.
+ Older Source ID references will not be used in the future.
+------------------------------------------------------------------------------------------------------------
+ 184744     : 2c918087701c40cf01701dfdf2c61e2a      
+ 226454     : 2c9180877a3f5acc017a43c671103c03      
+ 228616     : 2c9180877c337e84017c5261e23f1ec4      
+ 236466     : 2c918087825f9081018265298ff14eee      
+ 237117     : 2c91808783c7d7fd0183c882da42115d      
+ 237118     : 2c91808783c7d8070183c88371a3112a      
+ 215594     : 2c9180887769630b01776ee9be6f587d      
+ 237091     : 2c918088838b1cce0183c2b71ef23f05      
+ 228795     : 2c9180897cb94778017cc3a4af3e3d0e        
+------------------------------------------------------------------------------------------------------------
+        File [184744-AuthEmployees.csv]: Successfully resolved old source ID reference [184744] to new source ID reference [2c918087701c40cf01701dfdf2c61e2a]
+        File [184744-AuthEmployees.csv]: Submitting Account Aggregation: Source ID[2c918087701c40cf01701dfdf2c61e2a], Disable Optimization[false]
+        File [184744-AuthEmployees.csv]: Aggregation response: {"success":true,"task":{"type":"QUARTZ","id":"af1b82086c194f89acce82e156ff6e61","name":"Cloud Account Aggregation","description":"Aggregates from the specified application.","parentName":null,"launcher":"System","created":1714574212775,"launched":1714574212788,"completed":null,"completionStatus":null,"messages":[],"returns":[{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_APPLICATIONS","attributeName":"applications"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_TOTAL","attributeName":"total"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_OPTIMIZED","attributeName":"optimizedAggregation"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_IGNORED","attributeName":"ignored"},{"displayLabel":"TASK_OUT_UNCHANGED_ACCOUNTS","attributeName":"optimized"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_CREATED","attributeName":"created"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_UPDATED","attributeName":"updated"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_DELETED","attributeName":"deleted"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_MANAGER_CHANGES","attributeName":"managerChanges"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_BUSINESS_ROLE_CHANGES","attributeName":"detectedRoleChanges"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_EXCEPTION_CHANGES","attributeName":"exceptionChanges"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_POLICIES","attributeName":"policies"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_POLICY_VIOLATIONS","attributeName":"policyViolations"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_POLICY_NOTIFICATIONS","attributeName":"policyNotifications"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_SCORES_CHANGED","attributeName":"scoresChanged"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_SNAPSHOTS_CREATED","attributeName":"snapshotsCreated"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_SCOPES_CREATED","attributeName":"scopesCreated"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_SCOPES_CORRELATED","attributeName":"scopesCorrelated"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_SCOPES_SELECTED","attributeName":"scopesSelected"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_SCOPES_DORMANT","attributeName":"scopesDormant"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_UNSCOPED_IDENTITIES","attributeName":"unscopedIdentities"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_CERTIFICATIONS_CREATED","attributeName":"certificationsCreated"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_CERTIFICATIONS_DELETED","attributeName":"certificationsDeleted"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_APPLICATIONS_GENERATED","attributeName":"applicationsGenerated"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_MANAGED_ATTRIBUTES_PROMOTED","attributeName":"managedAttributesCreated"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_MANAGED_ATTRIBUTES_PROMOTED_BY_APP","attributeName":"managedAttributesCreatedByApplication"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_IDENTITYENTITLEMENTS_CREATED","attributeName":"identityEntitlementsCreated"},{"displayLabel":"TASK_OUT_ACCOUNT_AGGREGATION_GROUPS_CREATED","attributeName":"groupsCreated"}],"attributes":{"eventId":4311625,"appId":"2c918087701c40cf01701dfdf2c61e2a","optimizedAggregation":"enabled"},"progress":null}}
+        File [184744-AuthEmployees.csv]: Aggregated successfully.
+```
+
+For files that are not able to resolve, with the `--verbose` option enabled, you should see messages like this:
+
+```shell
+Analyzing account file: 82343-accounts.csv
+        File [82343-accounts.csv]: Detected with older source ID reference [82343]. Attempting to resolve.
+        File [82343-accounts.csv]: Unable to resolve old source ID reference [82343] to new source ID reference. This file will be skipped.
+        File [82343-accounts.csv]: Does not contain a valid source ID. Skipping...
+```
+
+This source file lookup table is generated once per execution of File Upload Utility and kept in memory.  For organizations with a lot of sources, this might be somewhat expensive, and sources going forward might not have references to old source IDs going forward.  To prevent this iteration, rename the files with the more modern file namings standard as mentioned in **File Naming Convention**.
+
+### Multiple Files or Directories
+
+File Upload Utility does allow specifying multiple files or directories, by supplying the `--file` or `-f` options multiple times.
+
+Here is example usage:
+```shell
+$ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identitynow.com --clientId d0b28ce1b2694b64949dd546de1ff574 --clientSecret a34...1df --file /Users/neil.mcglennon/test/file1/ --file /Users/neil.mcglennon/test/file2/
+```
+
+### Proxy Configurations
+
+Web (HTTP) proxies are supported by supplying proxy settings with the `--proxyHost` and `--proxyPort` options.  Here is example usage:
+```shell
+$ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identitynow.com --clientId d0b28ce1b2694b64949dd546de1ff574 --clientSecret a34...1df --file /Users/neil.mcglennon/test/resources/ --proxyHost 192.168.10.1 --proxyPort 8080
+```
+
+For authenticated proxies, add `--proxyUser` and `--proxyPassword` options as well. Here is example usage:
+```shell
+$ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identitynow.com --clientId d0b28ce1b2694b64949dd546de1ff574 --clientSecret a34...1df --file /Users/neil.mcglennon/test/resources/ --proxyHost 192.168.10.1 --proxyPort 8080 -proxyUser MyProxyUser --proxyPassword pr0xyP@s$w0rD
+```
+
+### Timeout Configurations
+
+Timeout settings are configurable by supplying a number of milliseconds to configure the timeout, using the `--timeout`, or `-t` options respectively. The default timeout in the File Upload Utility is 10 seconds (10,000 ms).
+
+```shell
+$ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identitynow.com --clientId d0b28ce1b2694b64949dd546de1ff574 --clientSecret a34...1df --file /Users/neil.mcglennon/test/resources/ --timeout 15000
+```
+
+Often timeouts are an indication that File Upload Utility is attempting to communicate with the SailPoint Cloud and not getting a response.  Usually, this due to network security controls, such as firewalls, preventing the communication.  Work with your network teams to make sure you can reach the SailPoint Cloud, and if necessary, adjust **Timeout Configurations** or even leverage **Proxy Configurations** if so required. 
+
+
+## Troubleshooting
+
+### Timeouts
+Timeouts are usually an indication that File Upload Utility is attempting to communicate with the SailPoint Cloud and not getting a response.  Usually, this due to network security controls, such as firewalls, preventing the communication.  Work with your network teams to make sure you can reach the SailPoint Cloud, and if necessary, adjust **Timeout Configurations** or even leverage **Proxy Configurations** if so required.
+
+See also **Timeout Configurations**.
+
+### 401 (Unauthorized) Errors 
+
+When File Upload Utility first connects to the SailPoint Cloud, it checks credentials to make sure the supplied Client ID and Client Secret are valid, and provide an access token.  If this fails, you'll typically see an error that looks like this:
+```text
+Checking credentials...
+Error Logging into Identity Security Cloud.  Please check your credentials and try again. [Error authenticating with credentials: 401 ]
+```
+In order to remedy this, make sure you are using a correct Personal Access Token on the right SailPoint tenant and URL. 
+
+### 403 (Forbidden) Aggregation Errors
+
+When File Upload Utility first connects to the SailPoint Cloud, it checks credentials to make sure the supplied Client ID and Client Secret are valid, and provide an access token.  While an access token may be valid, the token's usage may not have adequate access rights in order to carry out account or entitlement aggregations.  Make sure that the Personal Access Token supplied has correct access rights needed.  At current time of writing `ORG_ADMIN`, `SOURCE_ADMIN` or `SUB_SOURCE_ADMIN` access rights are required.
+
+### 400 (Bad Request) Aggregation Errors
+
+File Upload Utility doesn't perform any sort of validation or manipulation of files; it merely acts as transport to the SailPoint Cloud via the account aggregation and entitlement aggregation REST APIs.  Once the files are received, the SailPoint Cloud can provide errors back vis-a-vis the REST API responses.  These generally look like these:
+```text
+Analyzing account file: f1f3b747be924745afbc0c8a53f71baf-file-test-entitlement-feed.csv
+	File [f1f3b747be924745afbc0c8a53f71baf-file-test-entitlement-feed.csv]: Error: HTTP Code[400] Message[] Body[{"detailCode":"400.1.3 Illegal value","trackingId":"44a4f5a299d540df84537fc51fd9271f","messages":[{"locale":"und","localeOrigin":"REQUEST","text":"Column: \"[displayName, created, description, modified, entitlements, permissions]\" is unknown and/or column: \"[givenName, familyName, e-mail, location, manager]\" is missing"},{"locale":"en-US","localeOrigin":"DEFAULT","text":"Column: \"[displayName, created, description, modified, entitlements, permissions]\" is unknown and/or column: \"[givenName, familyName, e-mail, location, manager]\" is missing"}],"causes":[]}]
+```
+
+If any sort of 400 Bad Request errors are given, check your file configuration is relevant for the type of aggregation you are doing.  Sometimes this can be due to not specifying the correct object class on entitlement aggregations; this can be easily remedied by checking the `--objectType` option, and making sure the corresponding entitlement schema exists.
+
+### 500 (Internal Server Error) Aggregation Errors
+
+If you see a 500 Internal Server Error, this means there is a problem with the SailPoint Cloud processing itself.  If you see this, it is best to reproduce the issue using the REST APIs and alert SailPoint Support.  
 
 ## Frequently Asked Questions
 
 - Q: What are you doing about CC/V2 APIs being deprecated?
-- Good news! See my full response here:
+- A: As of File Upload Utility 4.0, this leverages supported V3 SailPoint REST APIs.  No older or private (CC) REST APIs are used in this.  
+
+
+- Q: Does File Upload Utility still support older (CC) Source IDs?
+- A: See **File Naming Backward Compatibility with Older Source IDs**
 
 
 - Q: How is File Upload Utility’s transmission secured?
 - A: File Upload Utility uses SailPoint REST APIs which are all secured over HTTPS / TLS 1.2.
 
+
 - Q: Does File Upload Utility support file-level encryption?
 - A: File Upload Utility does not currently support encryption or decryption of files themselves. However, additional scripting could surround File Upload Utility which could encrypt, decrypt, modify, or move files.
 
+
 - Q: Does File Upload support reading from SFTP, FTP, or SSH locations?
-- A: File Upload Utility only supports reading from local drives, not from remote SFTP, FTP, or SSH locations. However additional scripting could surround File Upload Utility which could connect to SFTP, FTP, or SSH sessions to transmit, modify, or move files.
-
-## File Upload / Aggregation
-
-The core purpose of the file upload utility is to upload one or many files from a specified directory (or directories), and send them to the SailPoint cloud for aggregation. To use this, you will provide the following options:
-
-| Option | Required	| Description
-| ---|
-|-url <arg>	| Yes | The SailPoint API Gateway. e.g. https://tenant.api.identitynow.com
-
--client_id <arg>	Yes	Personal Access Token Client ID.
-For more information, see: Best Practices: Using Personal Access Tokens in IdentityNow 8.
--client_secret <arg>	Yes	Personal Access Token Client Secret.
-For more information, see: Best Practices: Using Personal Access Tokens in IdentityNow 8.
--f <arg>, -files <arg>	Yes (if -e <arg>, -entitlement <arg> does not exist)	The specific files or directories where to find files to aggregate accounts. This can be specified multiple times.
--disableOptimization	No	Disables optimization for account aggregation.
-Default is false.
--e <arg>, -entitlement <arg>	Yes (if -f <arg>, -files <arg> does not exist)	The specific files or directories where to find files to aggregate entitlements. This can be specified multiple times.
--type	No	Optional Parameter to specify “type” of an entitlement aggregation.
-Default is group.
--r, -R	No	Optional flag to recursively search subdirectories.
-Default is false.
--s, -S, -simulate	No	Optional flag to simulate reading / processing of the files, but perform no actual uploading or aggregation.
-Default is false.
--t <arg>, -timeout <arg>	No	Optional value for timeout settings. The value is the number of milliseconds the timeout is configured for.
-Default is 10,000ms (10 seconds).
--x <arg>, -extension <arg>	No	Optional value to specify file extensions to look for when traversing directories. This can be specified multiple times.
-Default is csv.
--v, -verbose	No	Optional flag to enable verbose logging.
-Default is false.
--proxy_host	No	Optional proxy host name. Use -proxyHost, -proxyPort, and -proxyType together.
--proxy_port	No	Optional proxy port number. Use -proxyHost, -proxyPort, and -proxyType together.
--proxy_type	No	Optional proxy type. Use -proxyHost, -proxyPort, and -proxyType together. Values can be: http, socks, direct. Default is http.
--proxy_user	No	Optional proxy username for use in proxy authentication.
--proxy_password	No	Optional proxy password for use in proxy authentication.
-
-## File Naming Convention
-
-The File Upload Utility analyzes at the files or directories you specify, and then looks for the application’s source ID in the file name of the file. For example, for a file named “14586 - hr_users.csv” would determine that this file belongs to source ID 14586. A source ID is required for aggregation.
-
-If it doesn’t find the source ID in the file name, then it will skip the file and move on. Everything will be logged as output, so you are able to determine the file which are processed or not. The file upload utility currently uses private APIs to upload a file to a source, and the private APIs use a short ID to identify sources.
-Previously, you could find the corresponding source IDs by looking at the ID in the URL of the application source in the IdentityNow user interface. However, the UI now uses the long ID for sources. To get the short ID for the source you want to upload a file to, you must use the following API endpoint:
-
-https://<tenant>.api.identitynow.com/cc/api/source/list
-
-To test and see if your source ID can be found, run the simple regular expression on the file name:
-
-^(\\s)?([0-9]{1,10})
-Multiple Files or Directories
-
-File Upload Utility does allow specifying multiple files or directories, by supplying the -file or -f multiple times.
-
-Here is example usage:
-
-$java -jar FileUploadUtility.jar -url https://example.api.identitynow.com -client_id 550...b2a -client_secret 4fc...5e7 -f "/tmp/files/62863 - Employees.csv" -f "/tmp/files/62864 - Contractors.csv"
-Multiple Extensions
-
-When directories are specified, the File Upload Utility looks only at files with certain file extensions. By default these are files with an extension of .csv. To override these default extensions, you can specify multiple -x or -extension options.
-
-Here is example usage:
-
-$java -jar FileUploadUtility.jar -url https://example.api.identitynow.com -client_id 550...b2a -client_secret 4fc...5e7 -f /tmp/files/ -x txt -x csv
-Proxy Support
-
-Web-proxies are supported by supplying a proxy host, port, and type with the -proxy_host, -proxy_port, and -proxy_type options respectively.
-
-Here is example usage:
-
-$java -jar FileUploadUtility.jar -url https://example.api.identitynow.com -client_id 550...b2a -client_secret 4fc...5e7 -f /tmp/files/ -proxy_host 192.168.10.1 -proxy_port 8080 -proxy_type http
-The proxy support supports Basic Authentication as well by supplying the -proxy_user and -proxy_password values as well.
-
-Here is example usage:
-
-$java -jar FileUploadUtility.jar -url https://example.api.identitynow.com -client_id 550...b2a -client_secret 4fc...5e7 -f /tmp/files/ -proxy_host 192.168.10.1 -proxy_port 8080 -proxy_type http -proxy_user admin -proxy_password SomeAdminPassword
-Timeout Configuration
-
-Ttimeout settings are configurable by supplying a number of milliseconds to configure the timeout, using the -timeout, or -t options respectively. The default timeout in the file upload utility is 10 seconds (10,000 ms).
-
-Here is example usage:
-
-$java -jar FileUploadUtility.jar -url https://example.api.identitynow.com -client_id 550...b2a -client_secret 4fc...5e7 -f /tmp/files/ -timeout 15000
-Usage Example
-
-Uploading Accounts via file upload
-
-$java -jar FileUploadUtility.jar -url https://example.api.identitynow.com -client_id 550...b2a -client_secret 4fc...5e7 -f /tmp/files/ -disableOptimization -R -v
---------------------------------------------------------------
-SailPoint IdentityNow File Upload Utility
---------------------------------------------------------------
-Version:	3.0.5
-Date:		2022-12-01 15:00 CST
-Docs:		https://community.sailpoint.com/docs/DOC-3140
---------------------------------------------------------------
---------------------------------------------------------------
-URL:		        https://example.api.identitynow.com
-Account Files:	        /tmp/files
-Optimization:          Disabled
-Recursive:	        true
-Extensions:            csv
-Simulation:	        false
-Verbose:               true
-Timeout:               10000
---------------------------------------------------------------
-Checking credentials...
-Analyzing directory: /tmp/files
-Analyzing Account file:  62863.csv
-File [ 62863.csv] was aggregated successfully.
-Analyzing file: 62863 - Employees.csv
-File [62863 - Employees.csv] was aggregated successfully.
-Complete.
---------------------------------------------------------------
-Elapsed time:		2 seconds
-Total files processed:	2
---------------------------------------------------------------
-Success:	2
-/tmp/files/62863.csv
-/tmp/files/62863 - Employees.csv
---------------------------------------------------------------
-Error:		0
---------------------------------------------------------------
-Skipped:	0
---------------------------------------------------------------
-
-Uploading Entitlements via file upload
-
-$java -jar FileUploadUtility.jar -url https://example.api.identitynow.com -client_id 550...b2a -client_secret 4fc...5e7 -e /tmp/files/81260 - entitlement.csv
---------------------------------------------------------------
-SailPoint IdentityNow File Upload Utility
---------------------------------------------------------------
-Version:	3.0.5
-Date:		2022-12-01 15:00 CST
-Docs:		https://community.sailpoint.com/docs/DOC-3140
---------------------------------------------------------------
---------------------------------------------------------------
-URL:			https://example.api.identitynow.com
-Entitlement Files:	/tmp/files/81260 - entitlement.csv
-Entitlement Type:	group
-Recursive:		false
-Extensions:		csv
-Simulation:		false
-Verbose:		false
-Timeout:		10000
---------------------------------------------------------------
-Checking credentials...
-Analyzing Entitlement file: /tmp/files/81260 - entitlement.csv
-Analyzing Entitlement file: 81260 - entitlement.csv
-Entitlement File [81260 - entitlement.csv] was aggregated successfully.
-Complete.
---------------------------------------------------------------
-Elapsed time:		2 seconds
-Total files processed:	1
---------------------------------------------------------------
-Success:	1
-/tmp/files/81260 - entitlement.csv
---------------------------------------------------------------
-Error:		0
---------------------------------------------------------------
-Skipped:	0
---------------------------------------------------------------
-
-## Help
-
-The about command displays information about the IdentityNow File Upload Utility system version and date. This may be useful for troubleshooting and debugging.
-
-Option	Required	Description
--h,-help,-?	Yes	Displays usage information.
-Usage Example
-
-```
-$ java -jar sailpoint-file-upload-utility.jar --help
-
-Usage:
-
-Perform bulk file aggregations to Identity Security Cloud.
-
-java -jar sailpoint-file-upload-utility.jar [-dhRSvV] -s[=<clientSecret>]
-[-H=<proxyHost>] -i=<clientId> [-o=<objectType>] [-P=<proxyPort>]
-[-t=<timeout>] -u=<url> [-U=<proxyUser>] [-W=<proxyPassword>] -f=<files>
-[-f=<files>]... [-x=<fileExtensions>]...
-
-Description:
-
-Scans specified files and directories for files in bulk, to send to Identity
-Security Cloud for account or entitlement aggregation.  For more details see:
-https://developer.sailpoint.com/discuss/t/file-upload-utility/18181
-
-Options:
-  -u, --url=<url>           SailPoint API Gateway (e.g. https://tenant.api.
-                              identitynow.com)
-  -i, --client_id=<clientId>
-                            SailPoint Client ID (PAT)
-  -s, --client_secret[=<clientSecret>]
-                            SailPoint Client Secret (PAT)
-  -f, --file=<files>        File or directories for bulk aggregation.
-  -d, --disableOptimization Disable Optimization on Account Aggregation
-  -o, --objectType=<objectType>
-                            File Type; Account or Entitlement Schema. Default:
-                              Account
-  -R, --recursive           Recursively search directories
-  -S, --simulate            Simulation Mode.  Scans for files but does not
-                              aggregate.
-  -t, --timeout=<timeout>   Timeout (in milliseconds). Default: 10000 (10s)
-  -x, --extension=<fileExtensions>
-                            File extensions to search (for directories only).
-                              Default: csv
-  -v, --verbose             Verbose logging. Default: false
-  -H, --proxy_host=<proxyHost>
-                            Proxy Host
-  -P, --proxy_port=<proxyPort>
-                            Proxy Post
-  -U, --proxy_user=<proxyUser>
-                            Proxy User; Used for authenticated proxies
-  -W, --proxy_password=<proxyPassword>
-                            Proxy Password; Used for authenticated proxies
-  -V, --version             Displays the current version.
-  -h, --help                Display help.
-```
+- A: File Upload Utility only supports reading from local drives, not from remote SFTP, FTP, or SSH locations. However, additional scripting could surround File Upload Utility which could connect to SFTP, FTP, or SSH sessions to transmit, modify, or move files.
 
 
+- Q: What REST APIs does this use?
+- A: We use the following REST APIs:
+  - Account Aggregation - For account aggregations
+  - Entitlement Aggregation - For entitlement aggregations
+  - List Accounts - For source lookup
+  - Get Account - For source lookup
 
+## Upgrading from Previous Versions
+
+If you are coming from previous versions of File Upload Utility, you'll notice a few important changes:
+
+- **Java Requirements** - File Upload Utility 4.0.0 requires Java JDK 11+
+- **Command Line Options** - Some command line options have changed.  See **Options** for details.
+- **SailPoint APIs** - We are no longer using older (deprecated) CC Source APIs, and instead use newer Source APIs for Account Aggregation and Entitlement Aggregation.
+- **Source ID Format** - We use newer source ID  (e.g. `2c918087701c40cf01701dfdf2c61e2a`) formats in file names.  If you have older source ID (e.g. `184744`) formats we'll attempt to look it up.  See **File Naming Backward Compatibility with Older Source IDs**
+- **Proxy Type** - For those using proxies, proxy type no longer needs to be given.
 
 <!-- CONTRIBUTING -->
 ## Contributing

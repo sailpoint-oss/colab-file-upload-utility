@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import static sailpoint.utils.FileUploadUtility.*;
 
 @CommandLine.Command(
+		usageHelpAutoWidth = true,
 		name = "java -jar sailpoint-file-upload-utility.jar",
 		sortOptions = false,
 		headerHeading = "%nUsage:%n%n",
@@ -38,8 +39,8 @@ public class FileUploadUtility implements Callable<Integer> {
 	/**
 	 * Metadata about the File Upload Utility
 	 */
-	public static final String ABOUT_DATE = "2024-04-29 11:07 CST";
-	public static final String ABOUT_VERSION = "4.0.0 RC 2";
+	public static final String ABOUT_DATE = "2024-05-01 9:00 CST";
+	public static final String ABOUT_VERSION = "4.0.0";
 	public static final String ABOUT_LINK = "https://developer.sailpoint.com/discuss/t/file-upload-utility/18181";
 
 	/**
@@ -146,6 +147,12 @@ public class FileUploadUtility implements Callable<Integer> {
 		} catch ( UnsupportedClassVersionError ue ) {
 
 			System.out.println( "Unsupported version of Java: Please upgrade to JDK 11 or higher." );
+			System.exit( 1 );
+
+		} catch ( RuntimeException rte ) {
+
+			System.out.println( rte.getMessage() );
+			System.exit( 1 );
 
 		} catch ( Exception e ) {
 
@@ -171,8 +178,20 @@ public class FileUploadUtility implements Callable<Integer> {
 		logger.info( String.format("%1$-20s %2$-30s ", " Docs:", ABOUT_LINK ) );
 		logger.info( "------------------------------------------------------------------------------------------------------------" );
 
-		validateParameters();
+		/*
+		 * Perform some basic validations of the parameters provided.  Picocli already does validation of required parameters.
+		 */
 
+		if ( !StringUtils.startsWithIgnoreCase( url, "https://" ) )
+			throw new RuntimeException( "Usage: The provided --url parameter must begin with 'https://'" );
+
+		if ( !(StringUtils.endsWithIgnoreCase( url, ".api.identitynow.com" ) || StringUtils.endsWithIgnoreCase( url, ".api.identitynow-demo.com" ) ) )
+			throw new RuntimeException( "Usage: The provided --url parameter must be a valid API URL.  Please see documentation around allowed URLs." );
+
+		/*
+		 * Display configurations so that people can see how this is will run.  Also, useful for troubleshooting.
+		 * We do not want to display the client secret here for security reasons.
+		 */
 		logger.info( String.format("%1$-20s %2$-30s ", " URL:", url ) );
 		logger.info( String.format("%1$-20s %2$-30s ", " Client ID:", clientId ) );
 		logger.info( String.format("%1$-20s %2$-30s ", " Files:", StringUtils.join( files, ", \n" ) ) );
@@ -190,6 +209,9 @@ public class FileUploadUtility implements Callable<Integer> {
 
 		Timer.start();
 
+		/*
+		 * Create a SailPoint Service which will do all the API calls.
+		 */
 		this.sailPointService = new SailPointService.Builder()
 				.url( url )
 				.clientId( clientId )
@@ -202,8 +224,8 @@ public class FileUploadUtility implements Callable<Integer> {
 		if ( proxyHost != null && proxyPort != -1 )
 			logger.debug( "Proxy enabled!  Initializing proxy with settings: proxyHost[" + proxyHost + "], proxyPort[" + proxyPort + "]." );
 
-		/**
-		 * Start processing files...
+		/*
+		 * Check to make sure credentials are valid before we process files.
 		 */
 
 		logger.info( "Checking credentials..." );
@@ -213,9 +235,13 @@ public class FileUploadUtility implements Callable<Integer> {
 			sailPointService.createSession();
 
 		} catch ( Exception e ) {
-			logger.error( "Error Logging into Identity Security Cloud.  Check your credentials and try again. [" + e.getMessage() + "]" );
+			logger.error( "Error Logging into Identity Security Cloud.  Please check your credentials and try again. [" + e.getMessage() + "]" );
 			System.exit(1);
 		}
+
+		/*
+		 * Start processing files...
+		 */
 
 		if ( CollectionUtils.isNotEmpty( files ) ) {
 
@@ -265,32 +291,6 @@ public class FileUploadUtility implements Callable<Integer> {
 		logger.info( "------------------------------------------------------------------------------------------------------------" );
 
 		return 0;
-	}
-
-	/*
-	 * This function validates the configuration parameters.
-	 */
-	private void validateParameters() {
-
-		if ( url == null ) {
-			logger.error( "Usage: You must specify a -url parameter." );
-			System.exit( 1 );
-		}
-
-		if ( !StringUtils.startsWithIgnoreCase( url, "https://" ) ) {
-			logger.error( "Usage: Your -url parameter must begin with 'https://'" );
-			System.exit( 1 );
-		}
-
-		if ( !(StringUtils.endsWithIgnoreCase( url, ".api.identitynow.com" ) || StringUtils.endsWithIgnoreCase( url, ".api.identitynow-demo.com" ) ) ) {
-			logger.error( "Usage: Your -url parameter must be a valid API URL.  Please see documentation around allowed URLs." );
-			System.exit( 1 );
-		}
-
-		if ( clientId == null || clientSecret == null ) {
-			logger.info( "Usage: You must specify a SailPoint Personal Access Token Client ID or Secret. Review the documentation for further details." );
-			System.exit( 1 );
-		}
 	}
 
 	/*
@@ -391,16 +391,17 @@ public class FileUploadUtility implements Callable<Integer> {
 
 	}
 
-	private String getSourceReferenceFromFile(File file) {
+	private String getSourceReferenceFromFile( File file ) {
 
-		// First, look for the new-form Source ID in the file name
-		// This can be found on the Source object as "id": "2c918087701c40cf01701dfdf2c61e2a"
-		// and consists of 32 characters of any 0-9, a-f
-		//
-		// We'll parse the file name, and extract the new-form Source ID
-		//   e.g., 2c918087701c40cf01701dfdf2c61e2a - Something.csv
-		// Would return "2c918087701c40cf01701dfdf2c61e2a"
-
+		/*
+		 * First, look for the new-form Source ID in the file name
+		 * This can be found on the Source object as "id": "2c918087701c40cf01701dfdf2c61e2a"
+		 * and consists of 32 characters of any 0-9, a-f
+		 *
+		 * We'll parse the file name, and extract the new-form Source ID
+		 *   e.g., 2c918087701c40cf01701dfdf2c61e2a - Something.csv
+		 * Would return "2c918087701c40cf01701dfdf2c61e2a"
+ 		 */
 		Matcher newMatcher = Pattern
 				.compile("^(\\s)?([0-9a-f]{32})")
 				.matcher(file.getName());
@@ -415,17 +416,18 @@ public class FileUploadUtility implements Callable<Integer> {
 
 		}
 
-		// Second, look for the old-form Source ID in the file name
-		// This is mainly there for backwards compatibility purposes.
-		//
-		// This can be found on the Source object under "connectorAttributes"
-		// as "cloudExternalId": "184744"
-		// and consists of up to 10 characters of any number (0-9)
-		//
-		// We'll parse the file name, and extract the old-form Source ID
-		//   e.g., 184744 - Something.csv
-		// Would return "184744"
-
+		/*
+		 * Second, look for the old-form Source ID in the file name
+		 * This is mainly there for backwards compatibility purposes.
+		 *
+		 * This can be found on the Source object under "connectorAttributes"
+		 * as "cloudExternalId": "184744"
+		 * and consists of up to 10 characters of any number (0-9)
+		 *
+		 * We'll parse the file name, and extract the old-form Source ID
+		 *   e.g., 184744 - Something.csv
+		 * Would return "184744"
+		 */
 		Matcher oldMatcher = Pattern
 				.compile("^(\\s)?([0-9]{4,10})")
 				.matcher(file.getName());
@@ -446,7 +448,7 @@ public class FileUploadUtility implements Callable<Integer> {
 
 			/*
 			 * At this point, the sourceReferenceMap is not null, and has already been initialized.
-			 * Lets query what we have to see if we can resolve the oldSourceReference to the newSourceReference.
+			 * Let's query what we have to see if we can resolve the oldSourceReference to the newSourceReference.
 			 */
 
 			if (this.sourceReferenceMap.containsKey(fileSourceId)) {

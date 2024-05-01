@@ -8,7 +8,7 @@ public class Logger {
 		this( false );
 	}
 
-	public Logger(boolean verbose) {
+	public Logger( boolean verbose ) {
 		super();
 		this.verbose = verbose;
 	}

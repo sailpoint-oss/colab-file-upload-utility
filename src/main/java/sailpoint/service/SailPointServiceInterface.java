@@ -19,6 +19,7 @@ public interface SailPointServiceInterface {
 			@Query( "client_id" ) String client_id,
 			@Query( "client_secret" ) String client_secret );
 
+	@Headers( "Content-Type: application/json" )
 	@GET( "beta/sources/")
 	Call<List<Source>> listSources(
 			@Query( QUERY_COUNT  ) boolean count,
@@ -27,6 +28,7 @@ public interface SailPointServiceInterface {
 			@Query( "filters"  ) String filters,
 			@Query( "sorters"  ) String sorters );
 
+	@Headers( "Content-Type: application/json" )
 	@GET( "beta/sources/{id}")
 	Call<Source> getSource(
 			@Path( "id" ) String id );

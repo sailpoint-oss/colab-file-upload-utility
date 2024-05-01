@@ -112,7 +112,7 @@ public class SailPointService {
             if ( response.isSuccessful() )
                 session = response.body();
             else
-                throw new Exception ( "Error obtaining session! " + response.code() + " " + response.message() );
+                throw new Exception ( "Error authenticating with credentials: " + response.code() + " " + response.message() );
 
         } catch ( IOException e ) {
             e.printStackTrace();
