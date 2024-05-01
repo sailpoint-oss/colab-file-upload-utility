@@ -1,4 +1,4 @@
-package sailpoint.identitynow.utils;
+package sailpoint.utils;
 
 public class Timer {
 
