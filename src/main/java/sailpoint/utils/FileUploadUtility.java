@@ -185,7 +185,7 @@ public class FileUploadUtility implements Callable<Integer> {
 		if ( !StringUtils.startsWithIgnoreCase( url, "https://" ) )
 			throw new RuntimeException( "Usage: The provided --url parameter must begin with 'https://'" );
 
-		if ( !(StringUtils.endsWithIgnoreCase( url, ".api.identitynow.com" ) || StringUtils.endsWithIgnoreCase( url, ".api.identitynow-demo.com" ) ) )
+		if ( !(StringUtils.endsWithIgnoreCase( url, ".api.identitynow.com" ) || StringUtils.endsWithIgnoreCase( url, ".api.identitynow-demo.com" )  || StringUtils.endsWithIgnoreCase( url, ".api.saas.sailpointfedramp.com" ) ) )
 			throw new RuntimeException( "Usage: The provided --url parameter must be a valid API URL.  Please see documentation around allowed URLs." );
 
 		/*
