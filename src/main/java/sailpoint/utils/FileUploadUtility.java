@@ -39,8 +39,8 @@ public class FileUploadUtility implements Callable<Integer> {
 	/**
 	 * Metadata about the File Upload Utility
 	 */
-	public static final String ABOUT_DATE = "2024-05-01 9:00 CST";
-	public static final String ABOUT_VERSION = "4.0.0";
+	public static final String ABOUT_DATE = "2024-09-10 16:15 CST";
+	public static final String ABOUT_VERSION = "4.1.0";
 	public static final String ABOUT_LINK = "https://developer.sailpoint.com/discuss/t/file-upload-utility/18181";
 
 	/**
@@ -52,7 +52,7 @@ public class FileUploadUtility implements Callable<Integer> {
 	@Option( names = { "-i", "--clientId" }, required = true, description = "SailPoint Client ID (PAT)" )
 	private String clientId = "";
 
-	@Option( names = { "-s", "--clientSecret" }, required = true, description = "SailPoint Client Secret (PAT)", arity = "0..1", interactive = true )
+	@Option( names = { "-s", "--clientSecret" }, description = "SailPoint Client Secret (PAT)", arity = "0..1", interactive = true )
 	private String clientSecret = "";
 
 	@Option( names = { "-f", "--file" }, required = true, description = "File or directories for bulk aggregation." )
@@ -88,7 +88,7 @@ public class FileUploadUtility implements Callable<Integer> {
 	@Option( names = { "-U", "--proxyUser" }, description = "Proxy User; Used for authenticated proxies" )
 	private String proxyUser = null;
 
-	@Option( names = { "-W", "--proxyPassword" }, description = "Proxy Password; Used for authenticated proxies" )
+	@Option( names = { "-W", "--proxyPassword" }, description = "Proxy Password; Used for authenticated proxies", arity = "0..1", interactive = true )
 	private String proxyPassword = null;
 
 	@Option(names = { "-V", "--version" }, versionHelp = true, description = "Displays the current version.")
@@ -181,12 +181,22 @@ public class FileUploadUtility implements Callable<Integer> {
 		/*
 		 * Perform some basic validations of the parameters provided.  Picocli already does validation of required parameters.
 		 */
+		if( StringUtils.endsWithIgnoreCase( clientId, "env" ) ) {
+			logger.debug( " --clientId derived from $SAIL_CLIENT_ID" );
+			clientId = System.getenv( "SAIL_CLIENT_ID" );
+		}
+
+		if( StringUtils.endsWithIgnoreCase( clientSecret, "env" ) ) {
+			logger.debug( " --clientSecret derived from $SAIL_CLIENT_SECRET" );
+			clientSecret = System.getenv( "SAIL_CLIENT_SECRET" );
+
+		}
 
 		if ( !StringUtils.startsWithIgnoreCase( url, "https://" ) )
 			throw new RuntimeException( "Usage: The provided --url parameter must begin with 'https://'" );
 
-		if ( !(StringUtils.endsWithIgnoreCase( url, ".api.identitynow.com" ) || StringUtils.endsWithIgnoreCase( url, ".api.identitynow-demo.com" ) ) )
-			throw new RuntimeException( "Usage: The provided --url parameter must be a valid API URL.  Please see documentation around allowed URLs." );
+		if ( !SailPointUrl.isValid( url ) )
+			throw new RuntimeException( "Usage: The provided --url parameter must be a valid API URL: \n" + SailPointUrl.getDisplayableUrls() );
 
 		/*
 		 * Display configurations so that people can see how this is will run.  Also, useful for troubleshooting.

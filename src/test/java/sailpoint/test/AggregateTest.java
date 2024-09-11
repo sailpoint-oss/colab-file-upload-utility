@@ -4,7 +4,6 @@ import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
 import sailpoint.utils.FileUploadUtility;
-//import static com.github.stefanbirkner.systemlambda.SystemLambda.*;
 
 public class AggregateTest extends TestCase {
 
