@@ -114,7 +114,7 @@ This command is useful for quick reference in places where documentation is not 
 To see the current version of File Upload Utility, supply the `--version` or `-V` option.  Output should look like this:
 ```
 $ java -jar sailpoint-file-upload-utility.jar --version
-SailPoint File Upload Utility 4.1.0
+SailPoint File Upload Utility 4.1.1
 Build: 2024-09-10 16:15 CST
 Documentation: https://developer.sailpoint.com/discuss/t/file-upload-utility/18181
 JVM: 17.0.10 (Amazon.com Inc. OpenJDK 64-Bit Server VM 17.0.10+7-LTS)
@@ -131,7 +131,7 @@ $ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identity
 ------------------------------------------------------------------------------------------------------------
  SailPoint File Upload Utility
 ------------------------------------------------------------------------------------------------------------
- Version:            4.1.0                          
+ Version:            4.1.1                          
  Date:               2024-09-10 16:15 CST           
  Docs:               https://developer.sailpoint.com/discuss/t/file-upload-utility/18181 
 ------------------------------------------------------------------------------------------------------------
@@ -203,7 +203,7 @@ $ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identity
 ------------------------------------------------------------------------------------------------------------
  SailPoint File Upload Utility
 ------------------------------------------------------------------------------------------------------------
- Version:            4.1.0                          
+ Version:            4.1.1                          
  Date:               2024-09-10 16:15 CST           
  Docs:               https://developer.sailpoint.com/discuss/t/file-upload-utility/18181 
 ------------------------------------------------------------------------------------------------------------
@@ -244,9 +244,9 @@ This section outlines additional details related to troubleshooting, frequently 
 
 ### File Naming Convention
 
-The File Upload Utility analyzes at the files or directories you specify, and then looks for the application’s source ID in the beginning of the file name of the file. For example, for a file named `2c918087701c40cf01701dfdf2c61e2a-AuthEmployees.csv` a source ID `2c918087701c40cf01701dfdf2c61e2a` would be returned.  A source ID is required for either account or entitlement aggregation to succeed as that is what the REST APIs require. To find the source ID, you can see this in the browser's URL in your browser, or via source REST APIs.
+The File Upload Utility analyzes at the files or directories you specify, and then looks for the application’s source name or ID in the beginning of the file name of the file. For example, for a file named `2c918087701c40cf01701dfdf2c61e2a-AuthEmployees.csv` or `AuthEmployees.csv`, a source ID `2c918087701c40cf01701dfdf2c61e2a` would be found and returned.  A source name or ID is required for either account or entitlement aggregation to succeed as that is what the REST APIs require. To find the source ID, you can see this in the browser's URL in your browser, or via source REST APIs.
 
-If File Upload Utility doesn't find the source ID in the file name, then it will skip the file and move on to the next. Everything will be logged as output, so you are able to determine which file(s) were processed or not.  To test and see if your source ID can be found, run the simple regeular expression on the file name:
+If File Upload Utility doesn't find the source name or ID in the file name, then it will skip the file and move on to the next. Everything will be logged as output, so you are able to determine which file(s) were processed or not.  To test and see if your source ID can be found, run the simple regular expression on the file name:
 
 ```regexp
 ^(\s)?([0-9a-f]{32})
@@ -311,7 +311,7 @@ $ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identity
 ------------------------------------------------------------------------------------------------------------
  SailPoint File Upload Utility
 ------------------------------------------------------------------------------------------------------------
- Version:            4.1.0                          
+ Version:            4.1.1                          
  Date:               2024-09-10 16:15 CST           
  Docs:               https://developer.sailpoint.com/discuss/t/file-upload-utility/18181 
 ------------------------------------------------------------------------------------------------------------
@@ -344,7 +344,7 @@ Enter value for --clientSecret (SailPoint Client Secret (PAT)): a34xxxxxxxxxxxxx
 ------------------------------------------------------------------------------------------------------------
  SailPoint File Upload Utility
 ------------------------------------------------------------------------------------------------------------
- Version:            4.1.0                          
+ Version:            4.1.1                          
  Date:               2024-09-10 16:15 CST           
  Docs:               https://developer.sailpoint.com/discuss/t/file-upload-utility/18181 
 ------------------------------------------------------------------------------------------------------------
@@ -428,7 +428,7 @@ If you see a 500 Internal Server Error, this means there is a problem with the S
 
 
 - Q: How can I secure my `--clientSecret` values?
-- A: The `--clientSecret` value can be entered via arguments, and provided and secured by any other scripts calling File Upload Utility.  Additionally, File Upload Utility 4.1.0 supports interactive entry by providing `--clientSecret` with no value.  Client secrets can be provided from the `SAIL_CLIENT_SECRET` environment variable by configuring the command line option as `--clientSecret env`.
+- A: The `--clientSecret` value can be entered via arguments, and provided and secured by any other scripts calling File Upload Utility.  Additionally, File Upload Utility 4.1.1 supports interactive entry by providing `--clientSecret` with no value.  Client secrets can be provided from the `SAIL_CLIENT_SECRET` environment variable by configuring the command line option as `--clientSecret env`.
 
 
 - Q: What are you doing about CC/V2 APIs being deprecated?
@@ -462,7 +462,7 @@ If you see a 500 Internal Server Error, this means there is a problem with the S
 
 If you are coming from previous versions of File Upload Utility, you'll notice a few important changes:
 
-- **Java Requirements** - File Upload Utility 4.1.0 requires Java JDK 11+
+- **Java Requirements** - File Upload Utility 4.1.1 requires Java JDK 11+
 - **Command Line Options** - Some command line options have changed.  See **Options** for details.
 - **SailPoint APIs** - We are no longer using older (deprecated) CC Source APIs, and instead use newer Source APIs for Account Aggregation and Entitlement Aggregation.
 - **Source ID Format** - We use newer source ID  (e.g. `2c918087701c40cf01701dfdf2c61e2a`) formats in file names.  If you have older source ID (e.g. `184744`) formats we'll attempt to look it up.  See **File Naming Backward Compatibility with Older Source IDs**
