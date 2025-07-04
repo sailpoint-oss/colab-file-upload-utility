@@ -1,9 +1,10 @@
 package sailpoint.test;
 
 import junit.framework.TestCase;
+import sailpoint.app.FileUploadUtility;
+
 import org.junit.Before;
 import org.junit.Test;
-import sailpoint.utils.FileUploadUtility;
 
 public class HelpTest extends TestCase {
 	

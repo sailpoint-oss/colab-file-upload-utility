@@ -1,0 +1,37 @@
+{
+  "tenant": {
+    "url": "https://\u003cexample\u003e.api.identitynow.com",
+    "clientId": "env",
+    "clientSecret": "env"
+  },
+  "proxy": {
+    "enabled": false,
+    "host": "",
+    "port": 1234,
+    "user": "",
+    "password": ""
+  },
+  "aggregations": [
+    {
+      "sourceId": "c199f36176f4439d80b985f2c8fadcd2",
+      "disableOptimization": false,
+      "objectType": "Account",
+      "recursive": false,
+      "simulate": false,
+      "timeout": 10000,
+      "extensions": [
+        "csv",
+        "tsv"
+      ],
+      "enableFileJourney": true,
+      "structure": {
+        "in": "/data/projects/sailpoint/in",
+        "stage": "/data/projects/sailpoint/stage",
+        "archive": "/data/projects/sailpoint/archive",
+        "error": "/data/projects/sailpoint/error"
+      }
+    }
+  ],
+  "ks": "/bbBHTipkkeHaEYxHfeErA\u003d\u003d",
+  "iv": "HabdXoZRZif7U7c/"
+}

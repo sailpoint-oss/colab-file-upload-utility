@@ -33,23 +33,23 @@ We cover using specific use cases further below, but here are all available opti
 
 | Option                               | Required | Example Usage                                  | Description                                                                                                                                                                                           |
 |--------------------------------------|----------|------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `-u <arg>`, `--url <arg>`            | Required | `--url https://example.api.identitynow.com`    | SailPoint API Gateway (e.g. https://tenant.api.identitynow.com)                                                                                                                                       |
-| `-i <arg>`, `--clientId <arg>`       | Required | `--clientId d0b...574`                         | SailPoint Client ID (PAT). If value of `env` is provided, then the value for environment variable `SAIL_CLIENT_ID` will be used.                                                                      |
-| `-s <arg>`, `--clientSecret <arg>`   | Required | `--clientSecret a34...1df`                     | SailPoint Client Secret (PAT).  If a value is not supplied, will be prompted interactively.  If value of `env` is provided, then the value for environment variable `SAIL_CLIENT_SECRET` will be used. |
-| `-f <arg>`, `--file <arg>`           | Required | `--file /Users/neil.mcglennon/test/resources/` | File or directories for bulk aggregation. This can be specified multiple times.                                                                                                                       |
-| `-d`, `--disableOptimization`        | Optional | `--disableOptimization`                        | Disable Optimization on Account Aggregation                                                                                                                                                           |
-| `-o <arg>`, `--objectType <arg>`     | Optional | `--objectType group`                           | File Type; Account or Entitlement Schema. Default: Account                                                                                                                                            |
-| `-R`, `--recursive`                  | Optional | `--recursive`                                  | Recursively search directories                                                                                                                                                                        |
-| `-S`, `--simulate`                   | Optional | `--simulate`                                   | Simulation Mode.  Scans for files but does not aggregate.                                                                                                                                             |
-| `-t <arg>`, `--timeout <arg>`        | Optional | `--timeout 100000`                             | Timeout (in milliseconds). Default: 10000 (10s)                                                                                                                                                       |
-| `-x <arg>`, `--extension <arg>`      | Optional | `--extension csv`                              | File extensions to search (for directories only).  Default: csv                                                                                                                                       |
-| `-v`, `--verbose`                    | Optional | `--verbose`                                    | Verbose logging. Default: false                                                                                                                                                                       |
-| `-H <arg>`, `--proxyHost <arg>`      | Optional | `--proxyHost proxy.host.com`                   | Proxy host name or IP. Use `--proxyHost` and `--proxyPort` together.                                                                                                                                  |
-| `-P <arg>`, `--proxyPort <arg>`      | Optional | `--proxyPort 443`                              | Proxy port. Use `--proxyHost` and `--proxyPort` together.                                                                                                                                             |
-| `-U <arg>`, `--proxyUser <arg>`      | Optional | `--proxyUser foo`                              | Proxy user for authenticated proxies. Use `--proxyUser` and `--proxyPassword` together.                                                                                                               |
-| `-W <arg>`, `--proxyPassword <arg>`  | Optional | `--proxyPassword bar`                          | Proxy password for authenticated proxies. Use `--proxyUser` and `--proxyPassword` together. If a value is not supplied, will be prompted interactively.                                                                                                          |
-| `-V`, `--version`                    | Optional | `--version`                                    | Displays the current version.                                                                                                                                                                         |
-| `-h`, `--help`                       | Optional | `--help`                                       | Displays help.                                                                                                                                                                                        |
+|`-c`, `--config-file`|Optional|`--config-file=/var/uploader/config.json`|Path and filename of JSON configuration file|
+| `-u <arg>`, `--url <arg>`| Required, if not using Config JSON | `--url https://example.api.identitynow.com`| SailPoint API Gateway (e.g. https://tenant.api.identitynow.com)|
+| `-i <arg>`, `--clientId <arg>`| Required, if not using Config JSON | `--clientId d0b...574`| SailPoint Client ID (PAT). If value of `env` is provided, then the value for environment variable `SAIL_CLIENT_ID` will be used.                                                                      |
+| `-s <arg>`, `--clientSecret <arg>`| Required, if not using Config JSON | `--clientSecret a34...1df`| SailPoint Client Secret (PAT).  If a value is not supplied, will be prompted interactively.  If value of `env` is provided, then the value for environment variable `SAIL_CLIENT_SECRET` will be used. |
+| `-f <arg>`, `--file <arg>`| Required, if not using Config JSON | `--file /Users/neil.mcglennon/test/resources/` | File or directories for bulk aggregation. This can be specified multiple times.|
+| `-d`, `--disableOptimization`| Optional | `--disableOptimization`| Disable Optimization on Account Aggregation|
+| `-o <arg>`, `--objectType <arg>`| Optional | `--objectType group`| File Type; Account or Entitlement Schema. Default: Account|
+| `-R`, `--recursive`| Optional | `--recursive`| Recursively search directories|
+| `-S`, `--simulate`| Optional | `--simulate`| Simulation Mode.  Scans for files but does not aggregate.|
+| `-t <arg>`, `--timeout <arg>`| Optional | `--timeout 100000`| Timeout (in milliseconds). Default: 10000 (10s)|
+| `-x <arg>`, `--extension <arg>`| Optional | `--extension csv`| File extensions to search (for directories only).  Default: csv|
+| `-H <arg>`, `--proxyHost <arg>`| Optional | `--proxyHost proxy.host.com`| Proxy host name or IP. Use `--proxyHost` and `--proxyPort` together.|
+| `-P <arg>`, `--proxyPort <arg>`| Optional | `--proxyPort 443`| Proxy port. Use `--proxyHost` and `--proxyPort` together.|
+| `-U <arg>`, `--proxyUser <arg>`| Optional | `--proxyUser foo`| Proxy user for authenticated proxies. Use `--proxyUser` and `--proxyPassword` together.|
+| `-W <arg>`, `--proxyPassword <arg>`  | Optional | `--proxyPassword bar`| Proxy password for authenticated proxies. Use `--proxyUser` and `--proxyPassword` together. If a value is not supplied, will be prompted interactively.|
+| `-V`, `--version`| Optional | `--version`| Displays the current version.|
+| `-h`, `--help`| Optional | `--help`| Displays help.|
 
 ## Requirements
 
@@ -62,40 +62,35 @@ In order to see help and usage of the File Upload Utility, supply the `--help` o
 
 ```shell
 $ java -jar sailpoint-file-upload-utility.jar --help
+
 Usage:
 
 Perform bulk file aggregations to Identity Security Cloud.
 
-java -jar sailpoint-file-upload-utility.jar [-dhRSvV] [-s[=<clientSecret>]] [-W
-[=<proxyPassword>]] [-H=<proxyHost>] -i=<clientId> [-o=<objectType>]
-[-P=<proxyPort>] [-t=<timeout>] -u=<url> [-U=<proxyUser>] -f=<files>
-[-f=<files>]... [-x=<fileExtensions>]...
+java -jar sailpoint-file-upload-utility.jar [-dhRSV] [-s[=<clientSecret>]] [-W[=<proxyPassword>]] [-c=<configFile>] [-H=<proxyHost>] [-i=<clientId>] [-o=<objectType>]
+ [-P=<proxyPort>] [-t=<timeout>] [-u=<url>] [-U=<proxyUser>] [-f=<files>]... [-x=<fileExtensions>]...
 
 Description:
 
-Scans specified files and directories for files in bulk, to send to Identity
-Security Cloud for account or entitlement aggregation.  For more details see:
-https://developer.sailpoint.com/discuss/t/file-upload-utility/18181
+Scans specified files and directories for files in bulk, to send to Identity Security Cloud for account or entitlement aggregation.  For more details see: https://developer.
+sailpoint.com/discuss/t/file-upload-utility/18181
 
 Options:
-  -u, --url=<url>           SailPoint API Gateway (e.g. https://tenant.api.
-                              identitynow.com)
-  -i, --clientId=<clientId> SailPoint Client ID (PAT)
+  -c, --config-file=<configFile>
+                            Path to config JSON file.
+  -u, --url=<url>           SailPoint API Gateway (e.g. https://tenant.api.identitynow.com)
+  -i, --clientId=<clientId> SailPoint Client ID (PAT) or 'env' if using SAIL_CLIENT_ID environment variable
   -s, --clientSecret[=<clientSecret>]
-                            SailPoint Client Secret (PAT)
+                            SailPoint Client Secret (PAT) or 'env' if using SAIL_CLIENT_SECRET environment variable
   -f, --file=<files>        File or directories for bulk aggregation.
   -d, --disableOptimization Disable Optimization on Account Aggregation
   -o, --objectType=<objectType>
-                            File Type; Account or Entitlement Schema. Default:
-                              Account
+                            File Type; Account or Entitlement Schema. Default: Account
   -R, --recursive           Recursively search directories
-  -S, --simulate            Simulation Mode.  Scans for files but does not
-                              aggregate.
+  -S, --simulate            Simulation Mode.  Scans for files but does not aggregate.
   -t, --timeout=<timeout>   Timeout (in milliseconds). Default: 10000 (10s)
   -x, --extension=<fileExtensions>
-                            File extensions to search (for directories only).
-                              Default: csv
-  -v, --verbose             Verbose logging. Default: false
+                            File extensions to search (for directories only).  Default: csv
   -H, --proxyHost=<proxyHost>
                             Proxy Host
   -P, --proxyPort=<proxyPort>
@@ -114,15 +109,23 @@ This command is useful for quick reference in places where documentation is not 
 To see the current version of File Upload Utility, supply the `--version` or `-V` option.  Output should look like this:
 ```
 $ java -jar sailpoint-file-upload-utility.jar --version
-SailPoint File Upload Utility 4.1.0
-Build: 2024-09-10 16:15 CST
+SailPoint File Upload Utility 4.1.1
+Build: 2025-06-28 03:15 AWST
 Documentation: https://developer.sailpoint.com/discuss/t/file-upload-utility/18181
-JVM: 17.0.10 (Amazon.com Inc. OpenJDK 64-Bit Server VM 17.0.10+7-LTS)
-OS: Mac OS X 14.6.1 aarch64
+JVM: 17.0.15 (Ubuntu OpenJDK 64-Bit Server VM 17.0.15+6-Ubuntu-0ubuntu124.04)
+OS: Linux 6.8.0-62-generic amd64
 ```
 This command is useful for quick reference which version of the File Upload Utility you are running, as well as which version of Java is being run, often for troubleshooting processes.
 
-## Aggregating Account Files
+## Aggregation (Using config.json)
+Refer to [CONFIG_JSON.md](./CONFIG_JSON.md) for detailed information on the configuration file format and examples.
+
+To aggregate account files, you'll want to specify the following options to load the configuration file:
+```bash
+java -jar sailpoint-file-upload-utility.jar --config-file /path/to/sailpoint/uploader/config.json
+```
+
+## Aggregating Account Files (Command-line args)
 
 To aggregate account files, you'll want to specify the following options:
 
@@ -143,7 +146,6 @@ $ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identity
  Recursive:          true                           
  Extensions:         csv                            
  Simulation:         false                          
- Verbose:            false                          
  Timeout:            10000                          
 ------------------------------------------------------------------------------------------------------------
 Checking credentials...
@@ -192,7 +194,7 @@ Complete.
 ```
 
 
-## Aggregating Entitlement Files
+## Aggregating Entitlement Files (Command-line args)
 
 To aggregate entitlement files, you'll want to specify the following options:
 
@@ -214,7 +216,6 @@ $ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identity
  Recursive:          true                           
  Extensions:         csv                            
  Simulation:         false                          
- Verbose:            true                           
  Timeout:            10000                          
 ------------------------------------------------------------------------------------------------------------
 Checking credentials...
@@ -243,7 +244,12 @@ Complete.
 This section outlines additional details related to troubleshooting, frequently asked questions, and other technical details.
 
 ### File Naming Convention
+Config File Only:
+If File Upload Utility doesn't find the `sourceId` specified in the `aggregations` section of the file in the tenant's configuration, then it will skip the aggregation and move on to the next if there is one.
 
+All notifications and errors are logged to the console and a file by default unless otherwise stated in a custom [Logging Configuration File](./LOGGING.md).
+
+Comand-Line Only:
 The File Upload Utility analyzes at the files or directories you specify, and then looks for the application’s source ID in the beginning of the file name of the file. For example, for a file named `2c918087701c40cf01701dfdf2c61e2a-AuthEmployees.csv` a source ID `2c918087701c40cf01701dfdf2c61e2a` would be returned.  A source ID is required for either account or entitlement aggregation to succeed as that is what the REST APIs require. To find the source ID, you can see this in the browser's URL in your browser, or via source REST APIs.
 
 If File Upload Utility doesn't find the source ID in the file name, then it will skip the file and move on to the next. Everything will be logged as output, so you are able to determine which file(s) were processed or not.  To test and see if your source ID can be found, run the simple regeular expression on the file name:
@@ -254,7 +260,7 @@ If File Upload Utility doesn't find the source ID in the file name, then it will
 
 ### File Naming Backward Compatibility with Older Source IDs
 
-For those who are upgrading from previous versions of File Upload Utility, you'll know that older source IDs (e.g. `184744`) are much shorter than newer source IDs (e.g. `2c918087701c40cf01701dfdf2c61e2a`).  In an attempt to keep backwards compatibility, if File Upload Utility detects an older short source ID (e.g. `184744`), it will attempt to look up which new source ID this might map to.  In order to do this, File Upload Utility will iterate through all sources in the system and download a list.  This is visible when running File Upload Utility with the `--verbose` option:
+For those who are upgrading from previous versions of File Upload Utility, you'll know that older source IDs (e.g. `184744`) are much shorter than newer source IDs (e.g. `2c918087701c40cf01701dfdf2c61e2a`).  In an attempt to keep backwards compatibility, if File Upload Utility detects an older short source ID (e.g. `184744`), it will attempt to look up which new source ID this might map to.  In order to do this, File Upload Utility will iterate through all sources in the system and download a list.  This is visible when running File Upload Utility with `DEBUG` logging enabled. See [Logging Configuration File](./LOGGING.md):
 
 ```shell
 ...
@@ -282,7 +288,7 @@ Analyzing account file: 184744-AuthEmployees.csv
         File [184744-AuthEmployees.csv]: Aggregated successfully.
 ```
 
-For files that are not able to resolve, with the `--verbose` option enabled, you should see messages like this:
+For files or aggregations that are not able to resolve, th efollowing will be logged:
 
 ```shell
 Analyzing account file: 82343-accounts.csv
@@ -295,6 +301,7 @@ This source file lookup table is generated once per execution of File Upload Uti
 
 ### Multiple Files or Directories
 
+Command-Line Only, if using configuration JSON file, see [Config JSON](./CONFIG_JSON.md).
 File Upload Utility does allow specifying multiple files or directories, by supplying the `--file` or `-f` options multiple times.
 
 Here is example usage:
@@ -305,6 +312,8 @@ $ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identity
 ### Environment Variable Configurations
 
 File Upload Utility does allow usage of environmental variables for the client ID and secret configurations.  By providing option `--clientId env` the client ID will be sourced from the `SAIL_CLIENT_ID` environment variable. By providing option `--clientSecret env` the client secret will be sourced from the `SAIL_CLIENT_SECRET` environment variable. 
+
+If using the [Config JSON](./CONFIG_JSON.md), update the `tenant/clientId` and/or `tenant/clientSecret` attributes to `env`, and the environment variables will be used as above.
 
 ```shell
 $ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identitynow.com --clientId env --clientSecret env --file /Users/neil.mcglennon/test/resources/ -R
@@ -325,7 +334,6 @@ $ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identity
  Recursive:          true                           
  Extensions:         csv                            
  Simulation:         false                          
- Verbose:            true                           
  Timeout:            10000                          
 ------------------------------------------------------------------------------------------------------------
 Checking credentials...
@@ -356,7 +364,6 @@ Enter value for --clientSecret (SailPoint Client Secret (PAT)): a34xxxxxxxxxxxxx
  Recursive:          true                           
  Extensions:         csv                            
  Simulation:         false                          
- Verbose:            true                           
  Timeout:            10000                          
 ------------------------------------------------------------------------------------------------------------
 Analyzing directory: /Users/neil.mcglennon/test/resources
@@ -365,7 +372,23 @@ Analyzing account file: 184744-AuthEmployees.csv
 ```
 
 ### Proxy Configurations
+Config JSON:
+When using the [Config JSON](./CONFIG_JSON.md), Web (HTTP) proxies are supported by populating the `proxy` object of the configuration file and setting the `enabled` attribute to `true`:
+```json
+{
+  ...
+  "proxy": {
+    "enabled": true,
+    "host": "my-proxy.host",
+    "port": 1234,
+    "user": "proxyuser",
+    "password": "mypassword"
+  }
+  ...
+}
+```
 
+Command-Line:
 Web (HTTP) proxies are supported by supplying proxy settings with the `--proxyHost` and `--proxyPort` options.  Here is example usage:
 ```shell
 $ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identitynow.com --clientId d0b28ce1b2694b64949dd546de1ff574 --clientSecret a34...1df --file /Users/neil.mcglennon/test/resources/ --proxyHost 192.168.10.1 --proxyPort 8080
@@ -378,7 +401,7 @@ $ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identity
 
 ### Timeout Configurations
 
-Timeout settings are configurable by supplying a number of milliseconds to configure the timeout, using the `--timeout`, or `-t` options respectively. The default timeout in the File Upload Utility is 10 seconds (10,000 ms).
+Timeout settings are configurable by supplying a number of milliseconds to configure the timeout, using the `--timeout`, or `-t` options respectively or updating the `timeout` attribute for the respective `aggregations` within the config file. The default timeout in the File Upload Utility is 10 seconds (10,000 ms).
 
 ```shell
 $ java -jar sailpoint-file-upload-utility.jar --url https://example.api.identitynow.com --clientId d0b28ce1b2694b64949dd546de1ff574 --clientSecret a34...1df --file /Users/neil.mcglennon/test/resources/ --timeout 15000

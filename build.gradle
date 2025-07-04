@@ -6,21 +6,26 @@ plugins {
 }
 
 group 'sailpoint.cloud'
-version '4.0.0'
+version '4.1.1'
 
 repositories {
     mavenCentral()
 }
 
 ext {
-    junitVersion = '5.8.2'
+    junitVersion = '5.13.1'
 }
 
-sourceCompatibility = '1.11'
-targetCompatibility = '1.11'
+// Updated to allow compatibility with Gradle syntax.
+java {
+    // Updated to Java 11, can be downgraded as required.  Personal preference.
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
-compileJava.options.fork = true
-compileJava.options.forkOptions.executable = '/opt/homebrew/Cellar/openjdk@11/11.0.23/bin/javac'
+// Removing hard coded path to Java
+// compileJava.options.fork = true
+// compileJava.options.forkOptions.executable = '/opt/homebrew/Cellar/openjdk@11/11.0.23/bin/javac'
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
@@ -28,21 +33,28 @@ tasks.withType(JavaCompile) {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'sailpoint.utils.FileUploadUtility'
+        attributes 'Main-Class': 'sailpoint.app.FileUploadUtility'
     }
 }
 
 dependencies {
-    implementation 'com.google.code.gson:gson:2.9.1'
-    implementation 'org.apache.commons:commons-lang3:3.14.0'
-    implementation 'org.apache.commons:commons-collections4:4.5.0-M1'
-    implementation 'commons-io:commons-io:2.16.1'
-    implementation 'info.picocli:picocli:4.7.5'
-    implementation 'com.squareup.retrofit2:retrofit:2.11.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    testImplementation 'junit:junit:4.13.1'
+    // 28/06/2025: Updated dependency versions to be latest
+    // Reviewed and have not identified any dependency that will 
+    // have breaking changes.
+    implementation 'com.google.code.gson:gson:2.13.1'
+    implementation 'org.apache.commons:commons-lang3:3.17.0'
+    implementation 'org.apache.commons:commons-collections4:4.5.0'
+    implementation 'commons-io:commons-io:2.19.0'
+    implementation 'info.picocli:picocli:4.7.7'
+    implementation 'com.squareup.retrofit2:retrofit:3.0.0'
+    implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
+    testImplementation 'junit:junit:4.13.2'
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testImplementation("org.junit.platform:junit-platform-launcher:1.13.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+
+    // 02/07/2025: Added Log4J implementation
+    implementation 'org.apache.logging.log4j:log4j-core:2.25.0'
 }
 
 test {
@@ -50,5 +62,5 @@ test {
 }
 
 application {
-    mainClass = 'sailpoint.utils.FileUploadUtility'
+    mainClass = 'sailpoint.app.FileUploadUtility'
 }
